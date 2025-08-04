@@ -1,0 +1,114 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
+
+local function createTeleportGui()
+    -- Wait for PlayerGui to exist
+    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+    if not playerGui then
+        playerGui = LocalPlayer:WaitForChild("PlayerGui")
+    end
+
+    -- Remove existing GUI if present
+    local existing = playerGui:FindFirstChild("TeleportGui")
+    if existing then
+        existing:Destroy()
+    end
+
+    -- Create ScreenGui
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "TeleportGui"
+    screenGui.ResetOnSpawn = false
+
+    -- Create Frame
+    local frame = Instance.new("Frame")
+    frame.Name = "MainFrame"
+    frame.Size = UDim2.new(0, 300, 0, 180)
+    frame.Position = UDim2.new(0.5, -150, 0.7, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    frame.Active = true
+    frame.Draggable = true
+    frame.Parent = screenGui
+
+    -- Create Label
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0, 30)
+    label.Position = UDim2.new(0, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = "Selecciona una opción:"
+    label.TextColor3 = Color3.new(1,1,1)
+    label.Font = Enum.Font.SourceSansBold
+    label.TextSize = 20
+    label.Parent = frame
+
+    -- Create Teleport Button
+    local teleportButton = Instance.new("TextButton")
+    teleportButton.Name = "TeleportButton"
+    teleportButton.Size = UDim2.new(0, 240, 0, 50)
+    teleportButton.Position = UDim2.new(0.5, -120, 0, 50)
+    teleportButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    teleportButton.Text = "Teletransportarse AL final"
+    teleportButton.TextColor3 = Color3.new(1,1,1)
+    teleportButton.Font = Enum.Font.SourceSansBold
+    teleportButton.TextSize = 24
+    teleportButton.Parent = frame
+
+    -- Create Bonus Button
+    local bonusButton = Instance.new("TextButton")
+    bonusButton.Name = "BonusButton"
+    bonusButton.Size = UDim2.new(0, 240, 0, 50)
+    bonusButton.Position = UDim2.new(0.5, -120, 0, 110)
+    bonusButton.BackgroundColor3 = Color3.fromRGB(60, 180, 60)
+    bonusButton.Text = "Ir a Bonus!"
+    bonusButton.TextColor3 = Color3.new(1,1,1)
+    bonusButton.Font = Enum.Font.SourceSansBold
+    bonusButton.TextSize = 24
+    bonusButton.Parent = frame
+
+    -- Parent the GUI to PlayerGui
+    screenGui.Parent = playerGui
+
+    -- Teleport coordinates
+    local teleportPosition = Vector3.new(0, 499005.5, -49291)
+
+    -- Teleport function for first button
+    local function teleportPlayer()
+        local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.CFrame = CFrame.new(teleportPosition)
+        end
+    end
+
+    -- Teleport to Bonus block function for second button
+    local function teleportToBonus()
+        local bonusNames = {"Bonus1", "Bonus2", "Bonus3"}
+        local foundBlocks = {}
+        for i, name in bonusNames do
+            local block = Workspace:FindFirstChild(name)
+            if block and block:IsA("BasePart") then
+                table.insert(foundBlocks, block)
+            end
+        end
+        if #foundBlocks > 0 then
+            -- Choose one at random
+            local chosen = foundBlocks[math.random(1, #foundBlocks)]
+            local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                humanoidRootPart.CFrame = chosen.CFrame + Vector3.new(0, 5, 0)
+            end
+        else
+            -- No Bonus blocks found
+            bonusButton.Text = "No hay Bonus!"
+            task.wait(1)
+            bonusButton.Text = "Ir a Bonus!"
+        end
+    end
+
+    teleportButton.MouseButton1Click:Connect(teleportPlayer)
+    bonusButton.MouseButton1Click:Connect(teleportToBonus)
+end
+
+createTeleportGui()
+
